@@ -8,7 +8,7 @@ public class PuyoManager : MonoBehaviour
 {
 
     const int massWidth = 6;                    // よこのマス幅
-    int[][] puyoMasses = new int[massWidth][];  // ぷよマスのステータス
+    int[,] puyoMasses = new int[massWidth,11];  // ぷよマスのステータス
 
     [SerializeField]
     GameObject[] puyo;  // 生成するぷよPrefab
@@ -23,6 +23,14 @@ public class PuyoManager : MonoBehaviour
     void Start()
     {
         intervalCount = fallInterval;   // 
+
+        for(int x = 0;x < 6; x++)
+        {
+            for(int y = 0; y < 11; y++)
+            {
+                puyoMasses[x,y] = 0;
+            }
+        }
     }
 
     
@@ -42,7 +50,7 @@ public class PuyoManager : MonoBehaviour
 
                 foreach (var p in puyos)
                 {
-                    p.GetComponent<PairPuyoFall>().FallDown(puyoMasses);
+                    puyoMasses = p.GetComponent<PairPuyoFall>().FallDown(puyoMasses);
                 }
             }
 

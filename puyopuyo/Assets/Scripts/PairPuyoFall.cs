@@ -25,7 +25,7 @@ public class PairPuyoFall : MonoBehaviour
     }
 
     // ペアで下に落ちる
-    public int[][] FallDown(int[][] massState) {
+    public int[,] FallDown(int[,] massState) {
 
         // ペアで落下する
         for (int i = 0; i < 2; i++) {
@@ -33,7 +33,28 @@ public class PairPuyoFall : MonoBehaviour
             puyoesBody[i].transform.position += Vector3.down * 0.85f;
         }
 
+        bool fixFlag = false;
+
         // 着地判定
+        for(int i = 0; i < 2; i++)
+        {
+            // 一番下のライン
+            if(puyoesPos[i].y >= 10)
+            {
+                massState[(int)puyoesPos[i].x,(int)puyoesPos[i].y] = 1;
+                fixFlag = true;
+            }
+
+            if(massState[(int)puyoesPos[i].x,(int)puyoesPos[i].y] == 1)
+            {
+                SlideUp();
+                fixFlag = true;
+            }
+        }
+
+        if (fixFlag) {
+            Dissolusion();
+        }
 
         return massState;
     }
@@ -66,6 +87,15 @@ public class PairPuyoFall : MonoBehaviour
         puyoesBody[1].transform.position = newPos;
     }
 
+    // 1マス上げる
+    void SlideUp() {
+        // ペアで落下する
+        for (int i = 0; i < 2; i++)
+        {
+            puyoesPos[i].y -= 1;
+            puyoesBody[i].transform.position -= Vector3.down * 0.85f;
+        }
+    }
 
     // 着地したときにペア解散
     public void Dissolusion() {
@@ -74,5 +104,7 @@ public class PairPuyoFall : MonoBehaviour
         for (int i = 0; i < 2; i++) {
             puyoesBody[i].transform.parent = null;
         }
+
+        Destroy(this);
     }
 }
