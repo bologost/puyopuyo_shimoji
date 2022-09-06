@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2944565577458692380}
   - component: {fileID: 2944565577458692381}
-  - component: {fileID: 2944565577458692379}
+  - component: {fileID: -6151413681410324913}
   m_Layer: 0
   m_Name: GreenPuyo
   m_TagString: Untagged
@@ -82,19 +82,16 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2944565577458692379
+--- !u!114 &-6151413681410324913
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2944565577458692382}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89ae38d02b2556246be73cad2f832b87, type: 3}
+  m_Script: {fileID: 11500000, guid: 50a96504d544b2141bb06a931c33135a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puyoHeight: 0.85
-  fallInterval: 60
-  currentMassX: 0
-  currentMassY: 0
+  puyoType: 0

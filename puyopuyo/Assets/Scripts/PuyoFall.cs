@@ -6,66 +6,43 @@ using UnityEngine;
 
 public class PuyoFall : MonoBehaviour
 {
-    private Transform tf_Puyo;  // ぷよのTransform
-    private Vector2 currentPos; // ぷよの現在座標
-    
-    [SerializeField]
-    private float puyoHeight;   // ぷよの高さ
+    private const float puyoHeight = 0.85f;     // ぷよの高さ
 
-    [SerializeField]
-    private int fallInterval;   // 落下の間隔
-    private int intervalCount;  // 次の落下までのカウント
+    private Vector2 currentMass;                // 現在のマス
 
-    public int currentMassX;    // 現在のマスx
-    public int currentMassY;    // 現在のマスy
+    public int puyoType = 0;    // ぷよの種類 (0~5)
 
-    void Start()
-    {
-        tf_Puyo = this.transform;       // 
-        intervalCount = fallInterval;   // 
-    }
 
-    
-    void Update()
-    {
-
-        // インターバルのカウントの呼び出し
-        if (!CountToNextFall()) return;
-
-        // 下に落下
-        FallDown();
-    }
-
-    // インターバルのカウント
-    bool CountToNextFall() {
-
-        // カウントが０じゃなければ
-        if (intervalCount != 0) {
-
-            // カウントを減らす
-            intervalCount--;
-
-            // カウントが０以下になったら
-            if (intervalCount <= 0) {
-                intervalCount = fallInterval;  // カウントを初期化
-                return true;
-            }
-        }
-
-        // カウントが0以外ならfalseを返す
-        return false;
+    // 離別時に現在のマスを渡される
+    public void SetCurrentMass(Vector2 nowPos) {
+        currentMass = nowPos;
     }
 
     // 現在の座標より一段下に移動
-    void FallDown() {
+    public GameObject[,] FallDown(GameObject[,] massState) {
 
-        // 現在地の取得
-        currentPos = tf_Puyo.position;
+        int x = (int)currentMass.x;
+        int y = (int)currentMass.y;
 
-        // ぷよの高さ分だけ、下にずらす
-        currentPos.y -= puyoHeight;
+        // 下のマスにブロック判定 or 一番下のライン
+        while ( (y < 10 && massState[x, y + 1] == null))
+        {
+            // 今いるマスのStateを0に
+            massState[x, y] = null;
 
-        // 座標の繁栄
-        tf_Puyo.position = currentPos;
+            // 1マス下にずらす
+            currentMass.y += 1;
+
+            // ぷよの高さ分だけ、下にずらす
+            transform.position += Vector3.down * puyoHeight;
+
+            x = (int)currentMass.x;
+            y = (int)currentMass.y;
+
+            // 落ちた位置のマス状態を変更
+            massState[x, y] = this.gameObject;
+        }
+
+        return massState;
     }
 }
