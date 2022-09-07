@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class PairPuyoMover : MonoBehaviour
 {
@@ -37,7 +38,7 @@ public class PairPuyoMover : MonoBehaviour
         FallDown();
 
         // 回転の処理
-        PuyoRotate();
+        PuyoRotate(massState);
 
         // 矢印キーで操作
         PuyoMove(massState);
@@ -78,34 +79,67 @@ public class PairPuyoMover : MonoBehaviour
 
     // 内包ぷよを移動させる
     void PuyoSlide(GameObject[,] massState, int slideX, int slideY) {
+
+        Vector2[] posKeeper = new Vector2[2];   // 移動前の位置保存用
+        bool moveable = true;                   // 移動可能フラグを立てる
+
         for (int i = 0; i < 2; i++) {
-            Vector2 posKeeper = puyoesPos[i];               // 移動前の位置を保存
+            posKeeper[i] = puyoesPos[i];                    // 移動前の位置を保存
             puyoesPos[i] += new Vector2(slideX, slideY);    // 移動
+
+            if (puyoesPos[i].y < 0) continue;
 
             // ステージ外or既ぷよで移動を打ち消す
             if (puyoesPos[i].x < 0 || puyoesPos[i].x > 5)   // ステージ幅を超えたら戻す
             {
-                puyoesPos[i] = posKeeper;
-                break;
+                moveable = false;
             }
             else if (massState[(int)puyoesPos[i].x, (int)puyoesPos[i].y] != null)// 既にぷよがいるなら
             {
-                puyoesPos[i] = posKeeper;
-                break;
+                moveable = false;
+            }
+        }
+
+        // 移動可能フラグがおられなければ移動
+        for (int i = 0; i < 2; i++)
+        {
+            if (moveable)
+            {
+
+                puyoesBody[i].transform.position += new Vector3(slideX, -slideY, 0) * 0.85f;
             }
             else
-                puyoesBody[i].transform.position += new Vector3(slideX, -slideY, 0) * 0.85f;
+            {
+
+                puyoesPos[i] = posKeeper[i];
+            }
         }
+
     }
 
     // ペアで回る (時計周り)
-    void PuyoRotate() {
+    void PuyoRotate(GameObject[,] massState) {
 
         // スペースキーを押すと
         if (!Input.GetKeyDown(KeyCode.Space)) return;
 
-        // 変更前の値を保持
+        // 両隣が壁もしくはぷよだったら回転できない
+        int hitCount = 0;
+        if (puyoesPos[0].x == 0 || puyoesPos[0].x == 5) hitCount++;
+        if (puyoesPos[0].x > 0 && massState[(int)puyoesPos[0].x - 1, (int)puyoesPos[0].y] != null) hitCount++;
+        if (puyoesPos[0].x < 5 && massState[(int)puyoesPos[0].x + 1, (int)puyoesPos[0].y]) hitCount++;
+        if (hitCount >= 2) return;
 
+
+        // 衝突フラグ
+        bool hitFlag = false;
+
+        // 差分の計算用に移動前の座標を保持
+        Vector2[] posKeeper = new Vector2[puyoesPos.Length];
+        Array.Copy(puyoesPos, posKeeper, puyoesPos.Length);
+
+
+        
         // 位置関係State更新
         switch (twoPos) {
             case TwoPosition.UP:    ChangePuyoState(1, 0, TwoPosition.RIGHT);   break;
@@ -113,12 +147,42 @@ public class PairPuyoMover : MonoBehaviour
             case TwoPosition.LOW:   ChangePuyoState(-1, 0, TwoPosition.Left);   break;
             case TwoPosition.Left:  ChangePuyoState(0, -1, TwoPosition.UP);     break;
         }
+        
+
+        if(puyoesPos[1].x < 0 || puyoesPos[1].x > 5) {   // 壁と衝突していないかチェック
+
+            hitFlag = true;
+        }
+        else if (massState[(int)puyoesPos[1].x, (int)puyoesPos[1].y] != null) { // ぷよと衝突してないかチェック
+
+            hitFlag = true;
+        }
+
+        /* 衝突していたらずらす */
+        if (hitFlag)
+        {
+
+            switch (twoPos)
+            {
+                case TwoPosition.Left:
+                    puyoesPos[0].x += 1;
+                    puyoesPos[1].x += 1;
+                    break;
+
+                case TwoPosition.RIGHT:
+                    puyoesPos[0].x -= 1;
+                    puyoesPos[1].x -= 1;
+                    break;
+            }
+        }
+
+        // 移動差分を求める
+        Vector2 diffA = new Vector2(posKeeper[0].x - puyoesPos[0].x, puyoesPos[0].y - posKeeper[0].y);
+        Vector2 diffB = new Vector2(posKeeper[1].x - puyoesPos[1].x,puyoesPos[1].y - posKeeper[1].y);
 
         // 座標の更新
-        Vector2 newPos = puyoesBody[0].transform.position;
-        newPos.x += (puyoesPos[1].x - puyoesPos[0].x) * 0.85f;
-        newPos.y += (puyoesPos[0].y - puyoesPos[1].y) * 0.85f;
-        puyoesBody[1].transform.position = newPos;
+        puyoesBody[0].transform.position = puyoesBody[0].transform.position - (Vector3)diffA * 0.85f;
+        puyoesBody[1].transform.position = puyoesBody[1].transform.position - (Vector3)diffB * 0.85f;
     }
 
     // ぷよBの位置関係Stateを変更
@@ -135,11 +199,17 @@ public class PairPuyoMover : MonoBehaviour
         {
             if ((int)puyoesPos[i].x <= -1 || (int)puyoesPos[i].y <= -1) continue;
 
-            // ぷよの着地判定
-            if (puyoesPos[i].y >= 10 ||                                         // 一番下のライン
-                massState[(int)puyoesPos[i].x, (int)puyoesPos[i].y + 1] != null)  // 一つ下にぷよ
+            // 一番下のライン
+            if(puyoesPos[i].y >= 10){
+
+                puyoesPos[i].y = 10;
+                massState = Dissolusion(massState);
+                break;
+            } 
+            else if (massState[(int)puyoesPos[i].x, (int)puyoesPos[i].y + 1] != null)  // 一つ下にぷよ
             {
                 massState = Dissolusion(massState);
+                break;
             }
 
         }
@@ -153,9 +223,10 @@ public class PairPuyoMover : MonoBehaviour
         // ぷよがHierarchyに散在しないための空オブジェクト
         Transform g = GameObject.Find("PuyoColony").transform;
 
-        // 親オブジェクトから切り離す
+        // 親オブジェクトから切り離す (この時、y<0であればゲームオーバー)
         for (int i = 0; i < 2; i++) {
-            massState[(int)puyoesPos[i].x, (int)puyoesPos[i].y] = puyoesBody[i];    // 解散した位置を1に
+
+            massState[(int)puyoesPos[i].x, (int)puyoesPos[i].y] = puyoesBody[i];    // 解散後に配列に格納
             puyoesBody[i].transform.parent = g;                         // 親を変える
             var s_PuyoFall = puyoesBody[i].AddComponent<PuyoFall>();    // ぷよが自動で落ちるスクリプト
             s_PuyoFall.SetCurrentMass(puyoesPos[i]);                    // 現在の位置を渡してあげる

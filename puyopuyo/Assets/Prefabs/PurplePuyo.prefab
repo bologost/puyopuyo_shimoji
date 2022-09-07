@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2944565577458692380}
   - component: {fileID: 2944565577458692381}
   - component: {fileID: -3608482365362934895}
+  - component: {fileID: -7432201739810774142}
   m_Layer: 0
   m_Name: PurplePuyo
   m_TagString: Untagged
@@ -95,3 +96,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puyoType: 0
+--- !u!114 &-7432201739810774142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2944565577458692382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a80c86cde0944214cbf4e35ec0796c31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  twinkleImages:
+  - {fileID: 21300000, guid: 6b8bdadd053c33346be017c4c3382308, type: 3}
+  - {fileID: 21300000, guid: 6554b0382a48ea4498cf43e690837834, type: 3}
+  - {fileID: 21300000, guid: 24433773a624eb64da968bf2442b972e, type: 3}
+  - {fileID: 21300000, guid: ed51f61769925cb4c8d24617b0e7cd0f, type: 3}
+  - {fileID: 21300000, guid: 25c87b1b521241d4fbd121c1efbb4504, type: 3}
+  vanishImages:
+  - {fileID: 21300000, guid: bdff0668f4367aa46931786acb76a774, type: 3}
+  - {fileID: 21300000, guid: da616c4aa6d3d3d42a3d5943fbe42bd4, type: 3}
+  - {fileID: 21300000, guid: e22d5fc65d4b36d498f121519227ea51, type: 3}
+  - {fileID: 21300000, guid: 43e36500e63033b4b85d4955b6468eb2, type: 3}
+  - {fileID: 21300000, guid: d9bfb5eb64693ab49b742c7348035aa9, type: 3}
+  - {fileID: 21300000, guid: 3034e3b95c2933145b50b9c557d882a1, type: 3}
+  - {fileID: 21300000, guid: 695b61a06c81dd9448683c478795abe6, type: 3}

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2944565577458692380}
   - component: {fileID: 2944565577458692381}
   - component: {fileID: -5647689571937842130}
+  - component: {fileID: 2171478928233192041}
   m_Layer: 0
   m_Name: GrayPuyo
   m_TagString: Untagged
@@ -95,3 +96,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   puyoType: 0
+--- !u!114 &2171478928233192041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2944565577458692382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a80c86cde0944214cbf4e35ec0796c31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  twinkleImages:
+  - {fileID: 21300000, guid: 21169429dffd7a1468adfb41aa7f692c, type: 3}
+  - {fileID: 21300000, guid: 3a3ef41ea1af9534e87e1e7597b68d00, type: 3}
+  - {fileID: 21300000, guid: 1b4c17fea48c8e94785d5ceb3c9804af, type: 3}
+  - {fileID: 21300000, guid: 7eea8438581c37645985b7cd4b884315, type: 3}
+  - {fileID: 21300000, guid: d89c6d74ae291104db2390c41012af5f, type: 3}
+  vanishImages:
+  - {fileID: 21300000, guid: a2eba4de0f4cda44a86144c3e9fcaf9f, type: 3}
+  - {fileID: 21300000, guid: ef4451bc3d2bde8459d7f990a73aab0a, type: 3}
+  - {fileID: 21300000, guid: 60719543e7db47b429a8fa65140330c8, type: 3}
+  - {fileID: 21300000, guid: ff1b0ff7bb7478242b18be9215ba50c0, type: 3}
+  - {fileID: 21300000, guid: e137f55e083fae44ebf547db23372a0b, type: 3}
+  - {fileID: 21300000, guid: 183c65e339b86b741bd487a07ddac597, type: 3}
+  - {fileID: 21300000, guid: d80998436730ff7449b90fb9e9279805, type: 3}
