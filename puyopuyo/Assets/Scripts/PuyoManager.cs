@@ -47,6 +47,9 @@ public class PuyoManager : MonoBehaviour
     int chain = 0;
     int bestChain = 0;
 
+    // すくリプt
+    [SerializeField] GameManager s_GameManager;
+
     [SerializeField] Text puyoPosText;    // デバッグ用のText
     [SerializeField] Text arrayText;      // デバッグ用のText
 
@@ -385,6 +388,8 @@ public class PuyoManager : MonoBehaviour
         }
 
         // リザルト表示
-        
+        s_GameManager.ShowReslut(score, bestChain);
+        Destroy(this.gameObject);
+
     }
 }

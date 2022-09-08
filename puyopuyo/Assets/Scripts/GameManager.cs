@@ -14,9 +14,9 @@ public class GameManager : MonoBehaviour
         Application.targetFrameRate = frameRate;    // フレームレートを60に固定
     }
 
-    
-    void Update()
-    {
+
+    // ゲームが終了したときに、リザルトを表示 (最終スコアと最大チェイン数を引数でとる)
+    public void ShowReslut(int score, int bestChain) { 
         
     }
 }
