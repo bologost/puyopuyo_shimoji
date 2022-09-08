@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2944565577458692381}
   - component: {fileID: 4617932220178936701}
   - component: {fileID: -2086653762352683237}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: YellowPuyo
   m_TagString: Untagged
   m_Icon: {fileID: 0}

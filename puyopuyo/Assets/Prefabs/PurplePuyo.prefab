@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2944565577458692381}
   - component: {fileID: -3608482365362934895}
   - component: {fileID: -7432201739810774142}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PurplePuyo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
