@@ -1163,7 +1163,7 @@ MonoBehaviour:
   puyoPosText: {fileID: 1636508661}
   arrayText: {fileID: 499905681}
   comMode: 1
-  comThinkTime: 0.325
+  comThinkTime: 0.2
 --- !u!4 &354274864
 Transform:
   m_ObjectHideFlags: 0
@@ -2819,7 +2819,7 @@ MonoBehaviour:
   puyoPosText: {fileID: 1636508661}
   arrayText: {fileID: 499905681}
   comMode: 0
-  comThinkTime: 0
+  comThinkTime: 0.2
 --- !u!1 &1445592751
 GameObject:
   m_ObjectHideFlags: 0
