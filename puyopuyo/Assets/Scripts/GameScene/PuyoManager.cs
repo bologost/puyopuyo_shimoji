@@ -25,11 +25,11 @@ public class PuyoManager : MonoBehaviour
     bool reFallFlag = false;        // もう一度落ちるフラグ
 
     [SerializeField]
-    GameObject[,] puyoesOnMasses = new GameObject[massWidth,11];    // ぷよマスのステータス
+    GameObject[,] puyoesOnMasses = new GameObject[massWidth,massHeight];    // ぷよマスのステータス
 
     [SerializeField] GameObject[] puyo;      // 生成するぷよPrefab
-
     [SerializeField] Transform firstMassPos; // 左上のマス
+    [SerializeField] NextPuyoManager[] nextPuyo;  // 次に降るぷよ情報
 
     // 消すぷよの情報を入れる構造体とリスト
     struct VanishPuyoState {
@@ -43,7 +43,7 @@ public class PuyoManager : MonoBehaviour
     [SerializeField] Text scoreText;        // スコアテキスト
     int score = 0;
     [SerializeField] Text timerText;        // タイマーテキスト
-    float timer = 99;
+    float timer = 120;
     [SerializeField] GameObject chainText;  // 連鎖テキスト
     int chain = 0;
     int bestChain = 0;
@@ -53,6 +53,13 @@ public class PuyoManager : MonoBehaviour
 
     [SerializeField] Text puyoPosText;    // デバッグ用のText
     [SerializeField] Text arrayText;      // デバッグ用のText
+
+    // COMモードフラグ
+    [SerializeField] bool comMode = false;
+    [SerializeField, Range(0f, 1.5f)] float comThinkTime;
+
+    // ゲームオーバーフラグ
+    bool isOver = false;
 
     void Start()
     {
@@ -67,8 +74,13 @@ public class PuyoManager : MonoBehaviour
 
         // 最初のフェイズをPairFallに
         _phase = Phase.MAKE;
-    }
 
+        // 起動時に次のぷよをあらかじめ生成
+        for (int i = 0; i < 2; i++)
+        {
+            RandomNextPuyo(i);
+        }
+    }
     
     void Update()
     {
@@ -86,7 +98,15 @@ public class PuyoManager : MonoBehaviour
         UpdateScore();
 
         // タイマーカウントダウン
-        TimerCountDown();
+        if(!comMode) TimerCountDown();
+
+        // 相手が倒れたらゲームオーバーする
+        var managers = GameObject.FindObjectsOfType<PuyoManager>();
+        if (managers.Length != 2 && !isOver)
+        {
+            StartCoroutine("GameOverAnim");
+            isOver = true;
+        }
     }
 
     /* ========== フェイズ関数 ==========*/
@@ -100,21 +120,27 @@ public class PuyoManager : MonoBehaviour
         // 親オブジェクト
         GameObject parent = new GameObject();
         PairPuyoMover s_PairPuyoFall = parent.AddComponent<PairPuyoMover>();
+        s_PairPuyoFall.comMode = comMode;
 
-        // 子オブジェクトととしてぷよ二つ
+        // 次のぷよにあるぷよを生成
         for (int i = 0; i < 2; i++)
         {
-            int num = UnityEngine.Random.Range(0, 6);   // ランダムに種類分け
+            
+            int num = nextPuyo[0].GetPuyoType(i);
             Vector2 pos = CalcLinePos(line);            // 生成時のx座標を更新
             pos.y += 0.85f * i;                         // ぷよAとBで並ばせる
+            
             GameObject spawnedPuyo = Instantiate(puyo[num], pos, Quaternion.identity);  // 生成
-            spawnedPuyo.transform.parent = parent.transform;            // ぷよAとBの親を一つにまとめる
-            spawnedPuyo.GetComponent<PuyoTypeInfo>().puyoType = num;    // ぷよに自分を分からせる
+            spawnedPuyo.transform.parent = parent.transform;                            // ぷよAとBの親を一つにまとめる
+            spawnedPuyo.GetComponent<PuyoTypeInfo>().puyoType = num;                    // ぷよに自分を分からせる
+            s_PairPuyoFall.puyoesBody[i] = spawnedPuyo;                                 // 親に子を認知させる
 
-            // 
-            s_PairPuyoFall.puyoesBody[i] = spawnedPuyo;
+            CreateNextPuyo(i);
         }
 
+        RandomNextPuyo(1);
+
+        s_PairPuyoFall.thinkTime = comThinkTime;
         s_PairPuyoFall.Init(line);
 
         // ぺあぷよ落下フェイズへ
@@ -125,8 +151,14 @@ public class PuyoManager : MonoBehaviour
     void PairFall() {   // ペアで落下
 
         // 操作中のペアぷよが落ち終えたら かつ 連鎖がなかったら
-        var puyos = GameObject.FindObjectOfType<PairPuyoMover>();
-        if (!puyos)
+        var puyos = GameObject.FindObjectsOfType<PairPuyoMover>();
+        bool found = false;
+
+        foreach(var p in puyos){
+            if (comMode == p.comMode) found = true;
+        }
+
+        if (!found)
         {
             // 一番上のラインにぷよがのったら終わり
             for (int i = 0; i < massWidth; i++)
@@ -145,13 +177,11 @@ public class PuyoManager : MonoBehaviour
         {
 
             // 落下中のペアぷよ更新
-            puyoesOnMasses = puyos.PairPuyoUpdate(puyoesOnMasses);
-
-            // ペアぷよの座標デバッグ表示
-            {
-                puyoPosText.text = "ぷよA: " + puyos.puyoesPos[0] +
-                        "\nぷよB: " + puyos.puyoesPos[1];
+            
+            foreach(var p in puyos){
+                if(comMode == p.comMode) puyoesOnMasses = p.PairPuyoUpdate(puyoesOnMasses);
             }
+
         }
 
 
@@ -190,7 +220,10 @@ public class PuyoManager : MonoBehaviour
         // 個別ぷよ落下
         foreach (PuyoFall p in divorcedPuyos){
 
-            puyoesOnMasses = p.FallDown(puyoesOnMasses);
+            if (comMode == p.comMode)
+            {
+                puyoesOnMasses = p.FallDown(puyoesOnMasses);
+            }
         }
 
     }
@@ -267,6 +300,30 @@ public class PuyoManager : MonoBehaviour
 
     /* ========== 内部処理 ==========*/
 
+    // 次ぷよを作成
+    void RandomNextPuyo(int groupNum) {
+
+        // 子オブジェクトととしてぷよ二つ
+        for (int i = 0; i < 2; i++)
+        {
+            int num = UnityEngine.Random.Range(0, 6);                   // ランダムに種類分け
+
+            GameObject spawnedPuyo = Instantiate(puyo[num]);            // 生成
+            spawnedPuyo.GetComponent<PuyoTypeInfo>().puyoType = num;    // ぷよに自分を分からせる
+
+            nextPuyo[groupNum].SetNextPuyo(i, spawnedPuyo);
+        }
+    }
+
+    // 次ぷよBをAにし、新ぷよを追加
+    void CreateNextPuyo(int tempNum) {
+
+        int num = nextPuyo[1].GetPuyoType(tempNum);
+        GameObject spawnedPuyo = Instantiate(puyo[num]);            // 生成
+        spawnedPuyo.GetComponent<PuyoTypeInfo>().puyoType = num;    // ぷよに自分を分からせる
+        nextPuyo[0].SetNextPuyo(tempNum, spawnedPuyo);
+    }
+
     // 落下可能なぷよがあるかチェックする
     bool CheckAnyFallablePuyo() {
 
@@ -275,8 +332,13 @@ public class PuyoManager : MonoBehaviour
         // 落ちれるぷよはあるか判別
         foreach (PuyoFall p in GameObject.FindObjectsOfType<PuyoFall>())
         {
-
-            if (p.CheckFallable(puyoesOnMasses)) movedSomePuyo = true;
+            if (comMode == p.comMode)
+            {
+                if (p.CheckFallable(puyoesOnMasses))
+                {
+                    movedSomePuyo = true;
+                }
+            }
         }
 
         return movedSomePuyo;
@@ -381,7 +443,7 @@ public class PuyoManager : MonoBehaviour
 
             // 全ての個別ぷよを下におろす
             foreach (var o in GameObject.FindObjectsOfType<PuyoFall>()) {
-                if (o == null) continue;
+                if (o == null || (comMode != o.comMode) ) continue;
                 o.transform.position += Vector3.down * 0.2f;
             }
 
@@ -389,7 +451,10 @@ public class PuyoManager : MonoBehaviour
         }
 
         // リザルト表示
-        s_GameManager.ShowReslut(score, bestChain);
+        if (!comMode)
+        {
+            s_GameManager.ShowReslut(score, bestChain);
+        }
         Destroy(this.gameObject);
 
     }

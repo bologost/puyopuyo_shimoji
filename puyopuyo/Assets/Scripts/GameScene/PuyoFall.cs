@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 /* ぷよの落下すくりぷと */
 
@@ -17,6 +18,7 @@ public class PuyoFall : MonoBehaviour
     private const float fallTime = 0.1f;
     private float fallCount = fallTime;
 
+    public bool comMode = false;
 
     // 離別時に現在のマスを渡される
     public void SetCurrentMass(Vector2 nowPos) {
